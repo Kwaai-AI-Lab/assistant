@@ -123,15 +123,28 @@ class AuthManager:
         
     async def registrationResponse(self, challenge: str, email_id: str,user_id: str, response):
         async with db_session_context() as session:
-            expected_origin = "https://localhost:8443"
-            expected_rpid = "localhost"
-
-            res = verify_registration_response(credential=response, 
-                                               expected_challenge=base64url_to_bytes(challenge),
-                                               expected_origin=expected_origin,
-                                               expected_rp_id=expected_rpid,
-                                               require_user_verification=False
-                                               )
+            #get properties from env
+            paios_url = get_env_key("PAIOS_URL", "https://localhost:8443")
+            paiassistant_url = get_env_key("PAI_ASSISTANT_URL", "https://localhost:3000")
+            expected_rpid = get_env_key("PAIOS_HOST", "localhost")
+            
+            allowed_origins = [paiassistant_url, paios_url]
+            
+            res = None
+            for origin in allowed_origins:
+                try:
+                    res = verify_registration_response(
+                        credential=response,
+                        expected_challenge=base64url_to_bytes(challenge),
+                        expected_origin=origin,
+                        expected_rp_id=expected_rpid,
+                        require_user_verification=False
+                    )
+                    if res:  # If verification succeeds, break out of the loop
+                        break
+                except Exception as e:
+                    logger.warning(f"Failed verification for origin {origin}: {str(e)}")
+            
             if not res:
                 return False
             
@@ -198,8 +211,10 @@ class AuthManager:
         
     async def signinResponse(self, challenge: str,email_id:str, response):
         async with db_session_context() as session:
-            expected_origin = "https://localhost:8443"
-            expected_rpid = "localhost"
+            paios_url = get_env_key("PAIOS_URL", "https://localhost:8443")
+            paiassistant_url = get_env_key("PAI_ASSISTANT_URL", "https://localhost:3000")
+            allowed_origins = [paiassistant_url, paios_url]
+            expected_rpid = get_env_key("PAIOS_HOST", "localhost")
             credential_result = await session.execute(select(Cred).where(Cred.id == response["id"]))
             credential = credential_result.scalar_one_or_none()
 
@@ -212,14 +227,22 @@ class AuthManager:
             if not user:
                 return None
             
-            res = verify_authentication_response(credential=response,
-                                                 expected_challenge=base64url_to_bytes(challenge),
-                                                 expected_origin=expected_origin,
-                                                 expected_rp_id=expected_rpid,
-                                                 credential_public_key=base64url_to_bytes(credential.public_key),
-                                                 credential_current_sign_count=0,
-                                                 require_user_verification=True
-                                                 )
+            res = None
+            for origin in allowed_origins:
+                try:
+                    res = verify_authentication_response(credential=response,
+                                                        expected_challenge=base64url_to_bytes(challenge),
+                                                        expected_origin=origin,
+                                                        expected_rp_id=expected_rpid,
+                                                        credential_public_key=base64url_to_bytes(credential.public_key),
+                                                        credential_current_sign_count=0,
+                                                        require_user_verification=True
+                                                        )
+                    if res:  # If verification succeeds, break out of the loop
+                        break
+                except Exception as e:
+                    logger.warning(f"Failed verification for origin {origin}: {str(e)}")
+            
 
             if not res.new_sign_count != 1:
                 return None

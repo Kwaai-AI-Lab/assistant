@@ -103,7 +103,13 @@ XI_API_KEY="sk_******"
 XI_CHUNK_SIZE=1024
 TOP_K=10
 TOP_P=0.5
+PAIOS_URL='https://localhost:8443'
+PAI_ASSISTANT_URL='https://localhost:3000'
 ```
+__PAIOS_URL__: Url where is hosted the PAIOS
+
+__PAI_ASSISTANT_URL__: Url where is hosted the PAIAssistant
+
 __TEMPERATURE__: 
 The temperature of the model. Increasing the temperature will make the model answer more creatively. (Default: 0.8)
 
