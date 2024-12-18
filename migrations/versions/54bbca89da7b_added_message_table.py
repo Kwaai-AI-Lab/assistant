@@ -28,7 +28,7 @@ def upgrade() -> None:
             'message',
             sa.Column('id',  sqlmodel.sql.sqltypes.AutoString(), nullable=False),
             sa.Column('assistant_id',  sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-            sa.Column('conversation_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('conversation_id', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
             sa.Column('timestamp',  sqlmodel.sql.sqltypes.AutoString(), nullable=False),
             sa.Column('prompt',  sqlmodel.sql.sqltypes.AutoString(), nullable=False),
             sa.Column('chat_response',  sqlmodel.sql.sqltypes.AutoString(), nullable=False),

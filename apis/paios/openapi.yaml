@@ -317,8 +317,6 @@ paths:
               $ref: '#/components/schemas/ResourceCreate'
   '/resources/{id}':
     get:
-      security:
-        - jwt: []
       tags:
         - Resource Management
       summary: Retrieve resource by id
@@ -732,8 +730,6 @@ paths:
       - $ref: '#/components/parameters/id'  
   /shares:
     get:
-      security:
-        - jwt: []
       tags:
         - Share Management
       summary: Retrieve all share links
@@ -773,8 +769,6 @@ paths:
               $ref: '#/components/schemas/ShareCreate'
   '/shares/{id}':
     get:
-      security:
-        - jwt: []
       tags:
         - Share Management
       summary: Retrieve share link by id
@@ -1001,8 +995,6 @@ paths:
           description: Missing Required Information        
   /messages:
     post:
-      security:
-        - jwt: []
       summary: Create new message
       tags:
         - Message Management

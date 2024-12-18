@@ -160,7 +160,7 @@ class DocsPathsSchema(DocsPathsBaseSchema):
 
 # Message schemas
 class MessageBaseSchema(BaseModel):
-    conversation_id: str
+    conversation_id: Optional[str] = None
     assistant_id: str
     timestamp: str
     prompt: str
