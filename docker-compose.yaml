@@ -2,10 +2,11 @@ services:
   paios:
     build: 
       context: .  
-    extra_hosts:
-      - host.docker.internal:host-gateway
     ports:
       - "8443:8443" 
+networks:
+  network-kwaai:
+    driver: host
     # volumes:
     #   - path/cer:server/paios/data/cert
 
