@@ -22,6 +22,6 @@ jobs:
           IMAGE_TAG: "${{ steps.set-sha.outputs.sha_short }}"
         run: | 
           docker login  --username rquesada --password ${{ env.TOKEN_GITHUB }} ghcr.io
-          docker build --platform linux/amd64 -t ghcr.io/pai-os/assistant:IMAGE_TAG .
-          docker image tag ghcr.io/pai-os/assistant:IMAGE_TAG ghcr.io/pai-os/assistant:latest
-          docker push ghcr.io/pai-os/assistant:latest
+          docker build --platform linux/amd64 -t ghcr.io/kwaai-ai-lab/assistant:IMAGE_TAG .
+          docker image tag ghcr.io/kwaai-ai-lab/assistant:IMAGE_TAG ghcr.io/kwaai-ai-lab/assistant:latest
+          docker push ghcr.io/kwaai-ai-lab/assistant:latest
