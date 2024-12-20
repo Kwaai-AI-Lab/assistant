@@ -12,7 +12,6 @@ class ResourcesView:
         self.rm = ResourcesManager()
 
     async def get(self, id: str):
-        console.log("Get resources")
         resource = await self.rm.retrieve_resource(id)
         if resource is None:
             return JSONResponse({"error": "Resource not found"}, status_code=404)

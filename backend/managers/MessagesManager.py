@@ -8,8 +8,7 @@ from typing import Tuple, Optional
 from backend.utils import get_current_timestamp
 from backend.managers.RagManager import RagManager
 from langchain_ollama import OllamaLLM
-import os
-from dotenv import load_dotenv, set_key
+from common.utils import get_env_key
 from common.paths import base_dir
 
 class MessagesManager:
@@ -23,46 +22,15 @@ class MessagesManager:
                     cls._instance = super(MessagesManager, cls).__new__(cls, *args, **kwargs)
         return cls._instance
 
-    def __init__(self, max_tokens=None, temperature=None, top_k=None, top_p=None):
+    def __init__(self):
         if not hasattr(self, '_initialized'):
             with self._lock:
                 if not hasattr(self, '_initialized'):
                     self._initialized = True
-                    load_dotenv(base_dir / '.env')
-                    self.max_tokens = max_tokens if max_tokens else self.get_model_params('MAX_TOKENS')
-                    self.temperature = temperature if temperature else self.get_model_params('TEMPERATURE')
-                    self.top_k = top_k if top_k else self.get_model_params('TOP_K')
-                    self.top_p = top_p if top_p else self.get_model_params('TOP_P')
-                    
-    def get_model_params(self, param_name: str):
-        if param_name == 'MAX_TOKENS':
-            max_tokens=os.environ.get('MAX_TOKENS')       
-            if not max_tokens:                 
-                max_tokens = 200
-            set_key(base_dir / '.env', 'MAX_TOKENS', str(max_tokens))            
-            return max_tokens
-        
-        if param_name == 'TEMPERATURE':            
-            temperature=os.environ.get('TEMPERATURE')
-            if not temperature:
-                temperature = 0.2
-            set_key(base_dir / '.env', 'TEMPERATURE', str(temperature))
-            return temperature
-        
-        if param_name == 'TOP_K':
-            top_k=os.environ.get('TOP_K')
-            if not top_k:                
-                top_k = 40              
-            set_key(base_dir / '.env', 'TOP_K', str(top_k))        
-            return top_k
-        
-        if param_name == 'TOP_P':
-            top_p=os.environ.get('TOP_P')
-            if not top_p:                
-                top_p = 0.9
-                print("top_p", str(top_p))
-            set_key(base_dir / '.env', 'TOP_P', str(top_p))        
-            return top_p
+                    self.max_tokens = get_env_key('MAX_TOKENS', 200)
+                    self.temperature = get_env_key('TEMPERATURE', 0.2)
+                    self.top_k = get_env_key('TOP_K', 40)
+                    self.top_p = get_env_key('TOP_P', 0.9)
                         
     async def __get_llm_name__(self, assistant_id) -> Tuple[Optional[str], Optional[str]]:
         async with db_session_context() as session:

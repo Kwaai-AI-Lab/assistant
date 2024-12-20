@@ -1,6 +1,6 @@
-import os
 from dotenv import set_key
 from common.paths import base_dir
+import os
 
 # set up logging
 from common.log import get_logger
@@ -9,6 +9,10 @@ logger = get_logger(__name__)
 def get_env_key(key_name, default=None):
     value = os.environ.get(key_name)
     if not value:
+        # If running in Docker, do not write to .env
+        if os.environ.get('RUNNING_IN_DOCKER'):
+            raise ValueError(f"{key_name} is not set in the environment variables")
+        
         # If default is a function, call it to get the value, otherwise use it as the value
         if default is not None:
             if callable(default):
@@ -17,6 +21,8 @@ def get_env_key(key_name, default=None):
                 value = str(default)
         else:
             raise ValueError(f"{key_name} is not set in the environment variables")
+        
+        # Write to .env only in local development
         set_key(base_dir / '.env', key_name, value)
     return value
 

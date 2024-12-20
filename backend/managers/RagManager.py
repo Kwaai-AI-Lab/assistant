@@ -24,11 +24,11 @@ import logging
 from enum import Enum
 import aiofiles
 import asyncio
-from dotenv import load_dotenv, set_key
 from common.paths import base_dir
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
+from common.utils import get_env_key
 
 logger = logging.getLogger(__name__)
 
@@ -52,51 +52,18 @@ class RagManager:
                     cls._instance = super(RagManager, cls).__new__(cls, *args, **kwargs)
         return cls._instance
 
-    def __init__(self, chunk_size=None, chunk_overlap=None, add_start_index=None, embedder_model=None, system_prompt=None):
+    def __init__(self):
         if not hasattr(self, '_initialized'):
             with self._lock:
                 if not hasattr(self, '_initialized'):
                     self._initialized = True
-                    load_dotenv(base_dir / '.env')
-                    self.chunk_size = chunk_size if chunk_size else self.get_params('CHUNK_SIZE')
-                    self.chunk_overlap = chunk_overlap if chunk_overlap else self.get_params('CHUNK_OVERLAP')
-                    self.add_start_index = add_start_index if add_start_index else self.get_params('ADD_START_INDEX')
-                    self.embedder_model = embedder_model if embedder_model else self.get_params('EMBEDDER_MODEL')
-                    self.system_prompt = system_prompt if system_prompt else self.get_params('SYSTEM_PROMPT')
+                    self.chunk_size = get_env_key('CHUNK_SIZE', 2000)
+                    self.chunk_overlap = get_env_key('CHUNK_OVERLAP', 400)
+                    self.add_start_index = get_env_key('ADD_START_INDEX', 'True')
+                    self.embedder_model = get_env_key('EMBEDDER_MODEL', 'llama3:latest')
+                    self.system_prompt = get_env_key('SYSTEM_PROMPT',"You are a helpful assistant for students learning needs.")
                     print("params:::", self.chunk_size, self.chunk_overlap, self.add_start_index, self.embedder_model, self.system_prompt)           
-                    
-    def get_params(self, param_name: str):
-        if param_name == 'CHUNK_SIZE':
-            chunk_size=os.environ.get('CHUNK_SIZE')
-            if not chunk_size:
-                chunk_size = 2000
-            set_key(base_dir / '.env', 'CHUNK_SIZE', str(chunk_size))
-            return chunk_size
-        if param_name == 'CHUNK_OVERLAP':            
-            chunk_overlap=os.environ.get('CHUNK_OVERLAP')
-            if not chunk_overlap:
-                chunk_overlap = 400 
-            set_key(base_dir / '.env', 'CHUNK_OVERLAP', str(chunk_overlap))
-            return chunk_overlap
-        if param_name == 'ADD_START_INDEX':
-            add_start_index=os.environ.get('ADD_START_INDEX')
-            if not add_start_index:                
-                add_start_index = 'True'
-            set_key(base_dir / '.env', 'ADD_START_INDEX', str(add_start_index))        
-            return add_start_index
-        if param_name == 'EMBEDDER_MODEL':
-            embedder_model=os.environ.get('EMBEDDER_MODEL')
-            if not embedder_model:                
-                embedder_model = 'llama3:latest'
-            set_key(base_dir / '.env', 'EMBEDDER_MODEL', str(embedder_model))        
-            return embedder_model
-        if param_name == 'SYSTEM_PROMPT':
-            system_prompt=os.environ.get('SYSTEM_PROMPT')
-            if not system_prompt:                
-                system_prompt = "You are a helpful assistant for students learning needs."
-            set_key(base_dir / '.env', 'SYSTEM_PROMPT', str(system_prompt))        
-            return system_prompt 
-
+    
     async def create_index(self, resource_id: str, path_files: List[str], files_ids:List[str]) -> List[dict]:
         loop = asyncio.get_running_loop()        
         text_splitter = RecursiveCharacterTextSplitter(

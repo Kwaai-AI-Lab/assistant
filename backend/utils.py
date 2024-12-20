@@ -1,4 +1,3 @@
-import os
 from dotenv import set_key
 from common.paths import base_dir
 from datetime import datetime, timezone
@@ -6,21 +5,6 @@ from datetime import datetime, timezone
 # set up logging
 from common.log import get_logger
 logger = get_logger(__name__)
-
-def get_env_key(key_name, default=None):
-    value = os.environ.get(key_name)
-    if not value:
-        # If default is a function, call it to get the value, otherwise use it as the value
-        if default is not None:
-            if callable(default):
-                value = default()
-            else:
-                value = str(default)
-        else:
-            raise ValueError(f"{key_name} is not set in the environment variables")
-        set_key(base_dir / '.env', key_name, value)
-    return value
-
 
 # Returns dict with null fields removed (e.g., for OpenAPI spec compliant
 # responses without having to set nullable: true)
