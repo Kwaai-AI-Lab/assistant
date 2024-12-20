@@ -5,7 +5,7 @@ from connexion.resolver import MethodResolver
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
 from backend.db import init_db
-from backend.utils import get_env_key
+from common.utils import get_env_key
 
 def create_backend_app():
     # Initialize the database
@@ -14,11 +14,12 @@ def create_backend_app():
     apis_dir = Path(__file__).parent.parent / 'apis' / 'paios'
     connexion_app = AsyncApp(__name__, specification_dir=apis_dir)
     
-    allow_origins = [
-        'http://localhost:5173',  # Default Vite dev server
-        'https://localhost:8443',  # Secure port for local development
-        'https://localhost:3000'
-    ]
+    allow_origins = get_env_key(
+        'PAIOS_ALLOW_ORIGINS',
+        'http://localhost:5173,https://localhost:8443,https://localhost:3000'
+    )
+    
+    allow_origins = [origin.strip() for origin in allow_origins.split(',')]
 
     # Add PAIOS server URL if environment variables are set
     paios_scheme = get_env_key('PAIOS_SCHEME', 'https')

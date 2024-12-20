@@ -7,10 +7,8 @@ from backend.db import db_session_context
 from backend.schemas import ResourceCreateSchema, ResourceSchema
 from typing import List, Tuple, Optional, Dict, Any
 from backend.managers.UsersManager import UsersManager
-
-# This is a mock of the installed models in the system
-ollama_model=[{'name': 'llama3:latest', 'model': 'llama3:latest', 'modified_at': '2024-08-24T21:57:16.6075173-06:00', 'size': 2176178913, 'digest': '4f222292793889a9a40a020799cfd28d53f3e01af25d48e06c5e708610fc47e9', 'details': {'parent_model': '', 'format': 'gguf', 'family': 'phi3', 'families': ['phi3'], 'parameter_size': '3.8B', 'quantization_level': 'Q4_0'}}]
-
+from common.paths import base_dir
+from common.utils import get_env_key
 
 class ResourcesManager:
     _instance = None
@@ -27,9 +25,10 @@ class ResourcesManager:
         if not hasattr(self, '_initialized'):
             with self._lock:
                 if not hasattr(self, '_initialized'):
-                    # db.init_db()
                     self._initialized = True
-    
+                    self.ollama_local_url = get_env_key('OLLAMA_LOCAL_MODELS_URL', 'http://localhost:11434/api/tags')
+                    self.ollama_models_description_url = get_env_key('OLLAMA_MODELS_DESCRIPTION_URL', 'https://ollama.com/library/')
+        
     async def create_resource(self, resource_data: ResourceCreateSchema) -> str:
         resource_data_table: Dict[str, Any] = {}
         kind = resource_data.get("kind")
@@ -212,7 +211,7 @@ class ResourcesManager:
             if model_field:
                 resource_llm = {                                
                                     "name": model_field,
-                                    "uri":"https://ollama.com/library/"+ model_field,
+                                    "uri":self.ollama_models_description_url + model_field,
                                     "description": model_field,
                                     "resource_llm_id": None,
                                     "persona_id": None,
@@ -227,7 +226,7 @@ class ResourcesManager:
 
     async def get_ollama_installed_models(self) ->List:
         async with httpx.AsyncClient() as client:
-                response = await client.get("http://localhost:11434/api/tags")
+                response = await client.get(self.ollama_local_url)
                 if response.status_code == 200:
                     data = response.json()
                     models = data.get("models", [])

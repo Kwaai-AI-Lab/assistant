@@ -9,7 +9,7 @@ if base_dir not in sys.path:
     sys.path.append(str(base_dir))
 from common.paths import backend_dir, venv_dir, cert_dir
 from common.config import logging_config
-from backend.utils import get_env_key
+from common.utils import get_env_key
 from common.mail import send
 
 # check environment
