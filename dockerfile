@@ -1,14 +1,19 @@
-FROM python:3.11 
+FROM python:3.11-slim
 
-WORKDIR /server/paios
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    npm \
+    git \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY . .
+WORKDIR /app/assistant
 
-RUN python scripts/setup_environment.py
+COPY ./assistant /app/assistant
 
-WORKDIR /server
-COPY entrypoint.sh .
+ENV PYTHONPATH=/app
 
-EXPOSE 8443
+RUN python3 scripts/setup_environment.py
 
-CMD ["bash", "entrypoint.sh"]
+EXPOSE 8143
+
+CMD ["python3", "-m", "assistant"]

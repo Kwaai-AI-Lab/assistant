@@ -5,13 +5,7 @@ from dotenv import load_dotenv
 
 print("Initializing backend package")
 # Load environment variables
-RUNNING_IN_DOCKER = os.environ.get('RUNNING_IN_DOCKER', 'false').lower() == 'true'
-
-if not RUNNING_IN_DOCKER:
-    print("Loading .env file")
-    load_dotenv()
-else:
-    print(f"RUNNING_IN_DOCKER = {os.environ.get('RUNNING_IN_DOCKER')}")
+load_dotenv()
 
 # List of directories to ensure exist
 required_directories = [
