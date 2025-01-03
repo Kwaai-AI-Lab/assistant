@@ -104,7 +104,7 @@ class AuthManager:
 
             options = generate_registration_options(
                 rp_name="pAI-OS",
-                rp_id="localhost",
+                rp_id=get_env_key("PAIOS_EXPECTED_RP_ID"),
                 user_name=email_id,
                 user_id=user_id,
                 attestation=AttestationConveyancePreference.DIRECT,
@@ -126,8 +126,7 @@ class AuthManager:
             #get properties from env
             paios_url = get_env_key("PAIOS_URL", "https://localhost:8443")
             paiassistant_url = get_env_key("PAI_ASSISTANT_URL", "https://localhost:3000")
-            expected_rpid = get_env_key("PAIOS_HOST", "localhost")
-            
+
             allowed_origins = [paiassistant_url, paios_url]
             
             res = None
@@ -137,10 +136,10 @@ class AuthManager:
                         credential=response,
                         expected_challenge=base64url_to_bytes(challenge),
                         expected_origin=origin,
-                        expected_rp_id=expected_rpid,
+                        expected_rp_id=get_env_key("PAIOS_EXPECTED_RP_ID"),
                         require_user_verification=False
                     )
-                    if res:  # If verification succeeds, break out of the loop
+                    if res:
                         break
                 except Exception as e:
                     logger.warning(f"Failed verification for origin {origin}: {str(e)}")
@@ -200,7 +199,7 @@ class AuthManager:
                 ))
 
             options = generate_authentication_options(
-                rp_id="localhost",
+                rp_id=get_env_key("PAIOS_EXPECTED_RP_ID"),
                 timeout=12000,
                 allow_credentials=allow_credentials,
                 user_verification=UserVerificationRequirement.REQUIRED
@@ -211,10 +210,10 @@ class AuthManager:
         
     async def signinResponse(self, challenge: str,email_id:str, response):
         async with db_session_context() as session:
-            paios_url = get_env_key("PAIOS_URL", "https://localhost:8443")
-            paiassistant_url = get_env_key("PAI_ASSISTANT_URL", "https://localhost:3000")
+            paios_url = get_env_key("PAIOS_URL")
+            paiassistant_url = get_env_key("PAI_ASSISTANT_URL")
+
             allowed_origins = [paiassistant_url, paios_url]
-            expected_rpid = get_env_key("PAIOS_HOST", "localhost")
             credential_result = await session.execute(select(Cred).where(Cred.id == response["id"]))
             credential = credential_result.scalar_one_or_none()
 
@@ -230,14 +229,15 @@ class AuthManager:
             res = None
             for origin in allowed_origins:
                 try:
-                    res = verify_authentication_response(credential=response,
-                                                        expected_challenge=base64url_to_bytes(challenge),
-                                                        expected_origin=origin,
-                                                        expected_rp_id=expected_rpid,
-                                                        credential_public_key=base64url_to_bytes(credential.public_key),
-                                                        credential_current_sign_count=0,
-                                                        require_user_verification=True
-                                                        )
+                    res = verify_authentication_response(
+                        credential=response,
+                        expected_challenge=base64url_to_bytes(challenge),
+                        expected_origin=origin,
+                        expected_rp_id=get_env_key("PAIOS_EXPECTED_RP_ID"),
+                        credential_public_key=base64url_to_bytes(credential.public_key),
+                        credential_current_sign_count=0,
+                        require_user_verification=True
+                    )
                     if res:  # If verification succeeds, break out of the loop
                         break
                 except Exception as e:

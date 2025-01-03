@@ -1,16 +1,16 @@
+import asyncio
 import os
 import sys
 import signal
-import asyncio
 from pathlib import Path
-
 # Ensure the parent directory is in sys.path so relative imports work.
 base_dir = Path(__file__).parent
 if base_dir not in sys.path:
     sys.path.append(str(base_dir))
-from common.paths import backend_dir, venv_dir, cert_dir
+from common.paths import backend_dir, cert_dir
 from common.config import logging_config
 from common.utils import get_env_key
+from common.mail import send
 
 # check environment
 from backend.env import check_env
@@ -21,7 +21,6 @@ from common.log import get_logger
 logger = get_logger(__name__)
 
 def handle_keyboard_interrupt(signum, frame):
-    print(f"KeyboardInterrupt (ID: {signum}) has been caught. Cleaning up...")
     cleanup()
     asyncio.get_event_loop().stop()
 
@@ -31,8 +30,8 @@ def cleanup():
 
 if __name__ == "__main__":
     # Set up signal handlers
-    signal.signal(signal.SIGINT, handle_keyboard_interrupt)
-    signal.signal(signal.SIGTERM, handle_keyboard_interrupt)
+    #signal.signal(signal.SIGINT, handle_keyboard_interrupt)
+    #signal.signal(signal.SIGTERM, handle_keyboard_interrupt)
 
     # Ensure certificates are generated
     from common.cert import check_cert
@@ -44,11 +43,12 @@ if __name__ == "__main__":
     app = create_app()
 
     # Define host and port
-    host = get_env_key("PAIOS_HOST", "0.0.0.0")
+    host = get_env_key("PAIOS_HOST", "localhost")
     port = int(get_env_key("PAIOS_PORT", 8443))
 
     # Log connection details
     logger.info(f"You can access pAI-OS at https://{host}:{port}.")
+    #asyncio.run(send("samj@samj.net", "pAI-OS started up", f"You can access pAI-OS at https://{host}:{port}."))
     logger.info("Bypass certificate warnings if using self-signed certificates.")
 
     # Run the app
@@ -67,7 +67,7 @@ if __name__ == "__main__":
             workers=1, 
             reload=True, 
             reload_dirs=[backend_dir], 
-            reload_excludes=[venv_dir], 
+            reload_excludes=[],
             log_config=logging_config,
             ssl_certfile=str(cert_path),
             ssl_keyfile=str(key_path),
@@ -76,6 +76,7 @@ if __name__ == "__main__":
     except PermissionError as e:
         logger.error(f"Permission error: {e}. Ensure the application has access to the certificate and key files.")
     except KeyboardInterrupt:
+        #handle_keyboard_interrupt(None, None)
         pass
     finally:
         cleanup()
