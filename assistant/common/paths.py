@@ -10,10 +10,6 @@ backend_dir = base_dir / 'backend'
 frontend_dir = base_dir / 'frontend'
 env_file = backend_dir / '.env'
 
-# python venv
-venv_dir = base_dir / '.venv'
-venv_bin_dir = venv_dir / 'bin'
-
 # data
 data_dir = base_dir / 'data'
 cert_dir = data_dir / 'cert'

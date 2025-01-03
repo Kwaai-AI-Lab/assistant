@@ -7,7 +7,7 @@ from pathlib import Path
 base_dir = Path(__file__).parent
 if base_dir not in sys.path:
     sys.path.append(str(base_dir))
-from common.paths import backend_dir, venv_dir, cert_dir
+from common.paths import backend_dir, cert_dir
 from common.config import logging_config
 from common.utils import get_env_key
 from common.mail import send
@@ -67,7 +67,7 @@ if __name__ == "__main__":
             workers=1, 
             reload=True, 
             reload_dirs=[backend_dir], 
-            reload_excludes=[venv_dir], 
+            reload_excludes=[],
             log_config=logging_config,
             ssl_certfile=str(cert_path),
             ssl_keyfile=str(key_path),

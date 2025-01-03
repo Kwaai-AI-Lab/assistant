@@ -4,6 +4,9 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     npm \
     git \
+    libffi-dev \
+    libssl-dev \
+    build-essential \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/assistant

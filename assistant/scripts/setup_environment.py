@@ -7,7 +7,6 @@ from pathlib import Path
 
 import logging
 
-# Ensure the parent directory is in sys.path so relative imports work.
 base_dir = Path(__file__).parent.parent
 if base_dir not in sys.path:
     sys.path.append(str(base_dir))
@@ -15,12 +14,8 @@ if base_dir not in sys.path:
 from common.paths import base_dir, backend_dir, frontend_dir, env_file
 
 def setup_backend():
-    # Directly install Python dependencies globally within the container
     subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], check=True)
     subprocess.run([sys.executable, "-m", "pip", "install", "-r", str(backend_dir / "requirements.txt")], check=True)
-    
-    logging.info("<------Backend setup complete.------>")
-
 
 def build_frontend():
     print("Setting up the frontend environment...")
@@ -31,8 +26,6 @@ def build_frontend():
         subprocess.run([npm_path, "install"], check=True)
         subprocess.run([npm_path, "run", "build"], check=True)
         os.chdir(current_dir)
-
-        logging.info("<------Frontend built successfully.------>")
     else:
         print("Skipped as npm command not found.")
         print("Download Node.js to build the frontend or use a prebuilt version (e.g. canary branch): https://nodejs.org/en/download")
@@ -48,8 +41,6 @@ def setup_vscode():
         if not target_file.exists():
             shutil.copy(sample_file, target_file)
             print(f"Copied {sample_file} to {target_file}")
-
-    logging.info("<------VSCode configuration setup complete.------>")
 
 def main():
     setup_backend()

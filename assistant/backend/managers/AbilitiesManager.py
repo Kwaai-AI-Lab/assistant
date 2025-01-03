@@ -2,7 +2,7 @@ import json
 import re
 import os
 import signal
-from common.paths import abilities_dir, abilities_data_dir, venv_bin_dir
+from common.paths import abilities_dir, abilities_data_dir
 from common.utils import remove_null_fields
 from enum import Enum
 from pathlib import Path
@@ -312,7 +312,7 @@ class AbilitiesManager:
         if start_script_parts is None:
             return {"error": "Unable to determine start script executable"}, 500
 
-        search_paths = [abilities_dir / ability_id, abilities_data_dir / ability_id, venv_bin_dir]
+        search_paths = [abilities_dir / ability_id, abilities_data_dir / ability_id]
         script_found = False
         for path in search_paths:
             start_script_candidate = os.path.join(path, start_script_parts[0])
