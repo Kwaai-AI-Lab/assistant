@@ -41,7 +41,7 @@ def create_backend_app():
     connexion_app.add_middleware(
        CORSMiddleware,
        position=MiddlewarePosition.BEFORE_EXCEPTION,
-       allow_origins=allow_origins,
+       allow_origins=["https://localhost:3000","https://localhost:8443"],
        allow_credentials=True,
        allow_methods=["GET","POST","PUT","DELETE","PATCH","HEAD","OPTIONS"],
        allow_headers=["Authorization", "Content-Type", "Content-Range", "X-Total-Count"],
